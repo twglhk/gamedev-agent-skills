@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: card-identification
+expected_outcome: |
+  Rejects colour-only and remove-all-text proposals, and reviews distinct channels for type and cost,
+  the hierarchy of name, art and effect text alongside the wish to collect, and cross-screen identity of approved assets.
+  Creates no concrete palette or game content and keeps mockup review apart from playtesting.

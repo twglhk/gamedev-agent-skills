@@ -1,0 +1,104 @@
+<!doctype html>
+<!-- Character intro freeze frame. Render with ../scripts/render.py, opaque.
+     window.MG: bg (frozen frame), hero (same frame, character only on alpha), kicker, name, giant (big outline
+     text behind the cutout; defaults to name), line (may hold <em> for the highlight colour),
+     dur (seconds of the freeze; the exit takes the last 0.33 s, clear 2 frames before the cut), origin (hero centre "x% y%"),
+     cardTop (card's top edge, % of height), giantTop (% of height). Paths relative to this page or absolute file://.
+     Look: light, ink, accent (band and shadow), highlight (kicker chip, <em>, glow) as colours;
+     display, sans as CSS font stacks. Defaults are neutral; set your palette.
+     Beats at 30 fps: f0 cut + flash · f0-6 grade drops · f2-12 accent slash · f4-14 giant name
+     · f8-20 card slab + name · f15-21 kicker · f18-27 line · hold · f62-70 everything leaves, f70-71 clean. -->
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: "DisplayCX"; src: local("Futura Condensed ExtraBold"), local("Futura-CondensedExtraBold"); }
+  :root { --T: 2.4s; --o: 50% 52%; --cardTop: 58%; --giantTop: 14%;
+          --light: #f2f2ee; --ink: #141414; --accent: #d23c3c; --highlight: #f0b030;
+          --display: "DisplayCX", "Oswald", "Bebas Neue", "Impact", sans-serif;
+          --sans: "Helvetica Neue", "Inter", "Arial", sans-serif;
+          --out4: cubic-bezier(.165, .84, .44, 1);   /* power4.out: snappy, lands and stops */
+          --expo: cubic-bezier(.16, 1, .3, 1);        /* expo.out: fast start, long glide */
+          --in2: cubic-bezier(.55, .085, .68, .53); } /* power2.in: leaves without lingering */
+  html, body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+  .L { position: absolute; inset: 0; }
+  img.L { width: 100%; height: 100%; object-fit: cover; }
+  .bg { transform-origin: var(--o);
+        animation: grade .2s linear both, push var(--T) linear both; }
+  @keyframes grade { to { filter: brightness(.42) saturate(.35) contrast(1.1); } }
+  .bg.back { animation: grade .2s linear both, push var(--T) linear both, ungrade .27s var(--in2) calc(var(--T) - .33s) both; }
+  @keyframes ungrade { from { filter: brightness(.42) saturate(.35) contrast(1.1); } to { filter: none; } }
+  @keyframes push { 0% { transform: scale(1); } 86% { transform: scale(1.035); } 98% { transform: scale(1); } 100% { transform: scale(1); } }
+  .tone { background-image: radial-gradient(rgba(0,0,0,.55) 22%, transparent 26%); background-size: 1.1vmin 1.1vmin;
+          mix-blend-mode: multiply; opacity: 0;
+          animation: fadeIn .2s linear both, fadeOut .27s var(--in2) calc(var(--T) - .33s) forwards; }
+  .slash { left: -20%; right: -20%; top: calc(var(--giantTop) + 4%); bottom: auto; height: 36%;
+           background: var(--accent); transform: rotate(-9deg); transform-origin: 50% 50%;
+           clip-path: inset(0 100% 0 0);
+           animation: wipeIn .33s var(--expo) .07s both, wipeOut .27s var(--in2) calc(var(--T) - .33s) forwards; }
+  .slash::after { content: ""; position: absolute; inset: 0;
+           background-image: radial-gradient(rgba(0,0,0,.35) 24%, transparent 28%); background-size: 1.4vmin 1.4vmin; }
+  .giant { top: var(--giantTop); bottom: auto; text-align: center; transform: rotate(-9deg);
+           font: 31vmin/0.86 var(--display); letter-spacing: -.5vmin; text-transform: uppercase;
+           color: transparent; -webkit-text-stroke: .55vmin var(--light);
+           animation: giantIn .33s var(--out4) .13s both, fadeOut .2s var(--in2) calc(var(--T) - .33s) forwards; }
+  @keyframes giantIn { from { opacity: 0; transform: rotate(-9deg) scale(1.25); } to { opacity: .95; transform: rotate(-9deg) scale(1); } }
+  .hero, .rim { transform-origin: var(--o); animation: push var(--T) linear both; }
+  .rim { filter: drop-shadow(.7vmin 0 0 var(--light)) drop-shadow(-.7vmin 0 0 var(--light))
+                 drop-shadow(0 .7vmin 0 var(--light)) drop-shadow(0 -.7vmin 0 var(--light))
+                 drop-shadow(0 0 1.6vmin color-mix(in srgb, var(--highlight) 55%, transparent));
+         animation: push var(--T) linear both, fadeIn .1s linear .03s both, fadeOut .2s var(--in2) calc(var(--T) - .33s) forwards; }
+  .flash { background: #fff; animation: flash .17s linear both; }
+  @keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+  .card { left: 8.4%; right: auto; top: var(--cardTop); bottom: auto; }
+  .kick { display: inline-block; background: var(--highlight); color: var(--ink); font: 700 3.6vmin/1 var(--sans);
+          letter-spacing: .5vmin; padding: 1vmin 1.6vmin .8vmin; margin-bottom: 1.2vmin; transform-origin: 0 100%;
+          animation: kick .2s var(--out4) .5s both, leave .23s var(--in2) calc(var(--T) - .33s) forwards; }
+  @keyframes kick { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  .slab { position: relative; display: inline-block; }
+  .slab .sh { position: absolute; inset: 0; background: var(--accent); transform: translate(1.4vmin, 1.4vmin);
+              clip-path: inset(0 100% 0 0);
+              animation: wipeIn .4s var(--expo) .33s both, leave .23s var(--in2) calc(var(--T) - .31s) forwards; }
+  .slab .bk { position: relative; background: var(--ink); padding: 1.2vmin 3vmin .2vmin; overflow: hidden;
+              clip-path: inset(0 100% 0 0);
+              animation: wipeIn .4s var(--expo) .27s both, leave .23s var(--in2) calc(var(--T) - .33s) forwards; }
+  .name { display: block; font: 12.5vmin/1 var(--display); letter-spacing: .2vmin;
+          text-transform: uppercase; color: var(--light); transform: translateY(105%);
+          animation: rise .33s var(--out4) .37s both; }
+  .line { display: inline-block; margin-top: 1.6vmin; background: var(--ink); color: var(--light);
+          font: 800 4.6vmin/1.25 var(--sans); padding: 1vmin 2vmin;
+          clip-path: inset(0 100% 0 0);
+          animation: wipeIn .3s var(--out4) .6s both, leave .23s var(--in2) calc(var(--T) - .29s) forwards; }
+  .line em { font-style: normal; color: var(--highlight); }
+  @keyframes wipeIn { to { clip-path: inset(0 0 0 0); } }
+  @keyframes wipeOut { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 0 100%); } }
+  @keyframes rise { to { transform: translateY(0); } }
+  @keyframes leave { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-120%); opacity: 0; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeOut { to { opacity: 0; } }
+</style></head><body>
+<img class="L bg back" id="bg">
+<div class="L tone"></div>
+<div class="L slash"></div>
+<div class="L giant" id="giant"></div>
+<img class="L rim" id="rim">
+<img class="L hero" id="hero">
+<div class="L card">
+  <div class="kick" id="kick"></div><br>
+  <div class="slab"><div class="sh"></div><div class="bk"><span class="name" id="name"></span></div></div><br>
+  <div class="line" id="line"></div>
+</div>
+<div class="L flash"></div>
+<script>
+  const M = window.MG || {}, r = document.documentElement.style;
+  if (M.dur) r.setProperty("--T", M.dur + "s");
+  if (M.origin) r.setProperty("--o", M.origin);
+  if (M.cardTop) r.setProperty("--cardTop", M.cardTop);
+  if (M.giantTop) r.setProperty("--giantTop", M.giantTop);
+  for (const k of ["light", "ink", "accent", "highlight", "display", "sans"]) if (M[k]) r.setProperty("--" + k, M[k]);
+  const $ = id => document.getElementById(id);
+  $("bg").src = M.bg; $("rim").src = $("hero").src = M.hero;
+  $("kick").textContent = M.kicker || ""; $("name").textContent = M.name || "";
+  $("giant").innerHTML = (M.giant || M.name || "").split(" ").join("<br>");
+  $("line").innerHTML = M.line || "";
+  for (const id of ["kick", "line"]) if (!$(id).innerHTML) $(id).style.display = "none";  // name-only card
+</script>
+</body></html>

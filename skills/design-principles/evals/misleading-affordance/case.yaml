@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: misleading-affordance
+expected_outcome: |
+  Points out the mismatch between a cue that looks usable and the background's real (absent) action, and compares adjusting the cue first.
+  Rejects adding functions to every prop or tutorial text, and keeps approved-asset identity and the intended relation of the two emotions.
+  Keeps the stage-first scope and the boundaries: the human writes story, the coordinator makes no content, marketing runs only on the human's request.
